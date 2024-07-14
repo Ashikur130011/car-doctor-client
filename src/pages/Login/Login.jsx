@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import loginImg from '../../assets/images/login/login.svg'
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../provider/AuthProvider';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 
 const Login = () => {
+    const {loginUser} = useContext(AuthContext)
+    const location = useLocation()
+    const navigate = useNavigate()
 
     const handleLogin = (e) => {
         e.preventDefault()
@@ -11,6 +17,37 @@ const Login = () => {
         const email = form.email.value
         const password = form.password.value
         console.log(email, password)
+
+        loginUser(email, password)
+            .then(result => {
+                console.log(result.user)
+                if(result.user){
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: "Login Successfully",
+                        showConfirmButton: false,
+                        timer: 1500
+                      });
+
+                    }
+                    //navigate(location?.state ? location.state : '/' )
+                    //get access token
+                    const user = {email}
+                    axios.post('http://localhost:5000/jwt', user, {withCredentials:true})
+                    .then(res => {
+                        console.log(res.data)
+                        if(res.data.success){
+                            navigate(location?.state ? location.state : '/' )
+                        }
+                    })
+
+                form.reset()
+            })
+            .error(error => {
+                console.log(error.code)
+            })
+            
     }
     return (
         <div className="hero min-h-screen">
@@ -18,7 +55,7 @@ const Login = () => {
                 <div className="w-1/2">
                     <img src={loginImg} alt=""/>
                 </div>
-                <div className="card bg-base-100 w-full md:py-16 w-full max-w-md shrink-0 shadow-2xl">
+                <div className="card bg-base-100 md:py-16 w-full max-w-md shrink-0 shadow-2xl">
                 <h1 className="text-5xl  text-center font-bold">Login!</h1>
                     <form onSubmit={handleLogin} className="card-body">
                         <div className="form-control">

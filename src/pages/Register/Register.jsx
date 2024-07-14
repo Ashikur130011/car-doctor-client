@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import loginImg from '../../assets/images/login/login.svg'
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { AuthContext } from '../../provider/AuthProvider';
 
 const Register = () => {
+
+    const {createUser} = useContext(AuthContext)
 
     const handleRegister = (e) => {
         e.preventDefault()
         const form = e.target
+        const name = form.name.value
         const email = form.email.value
         const password = form.password.value
-        console.log(email, password)
+        console.log(name, email, password)
+
+        createUser(email, password)
+            .then( result => {
+                console.log(result.user)
+                if(result.user){
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: "Registered Successfully",
+                        showConfirmButton: false,
+                        timer: 1500
+                      });
+                }
+                form.reset()
+
+            })
+            .error(error => {
+                console.log(error.code)
+            })
+
+
     }
     return (
         <div className="hero min-h-screen">
@@ -20,6 +46,12 @@ const Register = () => {
                 <div className="card bg-base-100 md:py-16 w-full max-w-md shrink-0 shadow-2xl">
                 <h1 className="text-5xl  text-center font-bold">Register!</h1>
                     <form onSubmit={handleRegister} className="card-body">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Name</span>
+                            </label>
+                            <input type="text" name='name' placeholder="name" className="input input-bordered" required />
+                        </div>
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">Email</span>
